@@ -1,0 +1,13 @@
+{
+    "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"],
+    "pluginSearchDirs": false,
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "tsSingleQuote": true,
+    "tsxSingleQuote": true,
+    "trailingComma": "all",
+    "tabWidth": 4,
+    "semi": false,
+    "printWidth": 80,
+    "prettier.bracketSameLine": true
+}
