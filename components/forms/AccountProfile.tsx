@@ -1,5 +1,12 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
+import Image from 'next/image'
+import { usePathname, useRouter } from 'next/navigation'
+import { ChangeEvent, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -7,18 +14,16 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { UserValidation } from '@/lib/validations/user'
-import { zodResolver } from '@hookform/resolvers/zod'
-import Image from 'next/image'
-import { ChangeEvent, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Textarea } from '@/components/ui/textarea'
 
 import { useUploadThing } from '@/lib/uploadthing'
 import { isBase64Image } from '@/lib/utils'
-import * as z from 'zod'
-import { Textarea } from '../ui/textarea'
+
+import { updateUser } from '@/lib/actions/user.actions'
+import { UserValidation } from '@/lib/validations/user'
 
 interface Props {
     user: {
@@ -33,18 +38,49 @@ interface Props {
 }
 
 const AccountProfile = ({ user, btnTitle }: Props) => {
-    const [files, setFiles] = useState<File[]>([])
+    const router = useRouter()
+    const pathname = usePathname()
     const { startUpload } = useUploadThing('media')
 
-    const form = useForm({
+    const [files, setFiles] = useState<File[]>([])
+
+    const form = useForm<z.infer<typeof UserValidation>>({
         resolver: zodResolver(UserValidation),
         defaultValues: {
-            profile_photo: user?.image || '',
-            name: user?.name || '',
-            username: user?.username || '',
-            bio: user?.bio || '',
+            profile_photo: user?.image ? user.image : '',
+            name: user?.name ? user.name : '',
+            username: user?.username ? user.username : '',
+            bio: user?.bio ? user.bio : '',
         },
     })
+
+    const onSubmit = async (values: z.infer<typeof UserValidation>) => {
+        const blob = values.profile_photo
+
+        const hasImageChanged = isBase64Image(blob)
+        if (hasImageChanged) {
+            const imgRes = await startUpload(files)
+
+            if (imgRes && imgRes[0].fileUrl) {
+                values.profile_photo = imgRes[0].fileUrl
+            }
+        }
+
+        await updateUser({
+            name: values.name,
+            path: pathname,
+            username: values.username,
+            userId: user.id,
+            bio: values.bio,
+            image: values.profile_photo,
+        })
+
+        if (pathname === '/profile/edit') {
+            router.back()
+        } else {
+            router.push('/')
+        }
+    }
 
     const handleImage = (
         e: ChangeEvent<HTMLInputElement>,
@@ -64,31 +100,16 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                 const imageDataUrl = event.target?.result?.toString() || ''
                 fieldChange(imageDataUrl)
             }
+
             fileReader.readAsDataURL(file)
         }
-    }
-
-    const onSubmit = async (values: z.infer<typeof UserValidation>) => {
-        const blob = values.profile_photo
-
-        const hasImageChanged = isBase64Image(blob)
-
-        if (hasImageChanged) {
-            const imgRes = await startUpload(files)
-
-            if (imgRes && imgRes[0].fileUrl) {
-                values.profile_photo = imgRes[0].fileUrl
-            }
-        }
-
-        console.log(values)
     }
 
     return (
         <Form {...form}>
             <form
-                onSubmit={form.handleSubmit(onSubmit)}
                 className='flex flex-col justify-start gap-10'
+                onSubmit={form.handleSubmit(onSubmit)}
             >
                 <FormField
                     control={form.control}
@@ -99,15 +120,16 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                                 {field.value ? (
                                     <Image
                                         src={field.value}
-                                        alt='profile photo'
+                                        alt='profile_icon'
                                         width={96}
                                         height={96}
+                                        priority
                                         className='rounded-full object-contain'
                                     />
                                 ) : (
                                     <Image
-                                        src='assets/profile.svg'
-                                        alt='profile photo'
+                                        src='/assets/profile.svg'
+                                        alt='profile_icon'
                                         width={24}
                                         height={24}
                                         className='object-contain'
@@ -118,7 +140,7 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                                 <Input
                                     type='file'
                                     accept='image/*'
-                                    placeholder='Upload a photo'
+                                    placeholder='Add profile photo'
                                     className='account-form_image-input'
                                     onChange={(e) =>
                                         handleImage(e, field.onChange)
@@ -128,6 +150,7 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name='name'
@@ -143,9 +166,11 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                                     {...field}
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name='username'
@@ -161,9 +186,11 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                                     {...field}
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name='bio'
@@ -179,11 +206,13 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                                     {...field}
                                 />
                             </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
-                <Button className='bg-primary-500' type='submit'>
-                    Submit
+
+                <Button type='submit' className='bg-primary-500'>
+                    {btnTitle}
                 </Button>
             </form>
         </Form>
