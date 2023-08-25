@@ -1,0 +1,83 @@
+{
+    "explorer.autoReveal": "focusNoScroll",
+
+    //EDITOR
+    "editor.autoClosingBrackets": "always",
+    "editor.autoClosingDelete": "auto",
+    "editor.autoClosingQuotes": "beforeWhitespace",
+    "editor.autoIndent": "keep",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.dragAndDrop": true,
+    "editor.fontSize": 14,
+    "editor.fontFamily": "JetBrains Mono",
+    "editor.showDeprecated": true,
+    "editor.fontLigatures": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.guides.bracketPairs": true,
+    "editor.guides.highlightActiveBracketPair": true,
+    "editor.guides.highlightActiveIndentation": "always",
+    "editor.guides.indentation": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.lightbulb.enabled": true,
+    "editor.minimap.autohide": true,
+    "editor.lineHeight": 26,
+    "editor.links": true,
+    "editor.matchBrackets": "always",
+    "editor.renderWhitespace": "all",
+    "editor.semanticHighlighting.enabled": false,
+    "editor.showUnused": true,
+    "editor.tabCompletion": "on",
+    "editor.tabSize": 2,
+    "editor.tokenColorCustomizations": {
+        "comments": "#666ed4bd"
+    },
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 80,
+    "editor.formatOnSaveMode": "file",
+    //TERMINAL
+    "terminal.integrated.fontFamily": "MesloLGM NF",
+    "terminal.integrated.fontSize": 13,
+
+    //WORKBENCH
+    "workbench.colorCustomizations": {
+        "editor.lineHighlightBackground": "#1073cf2d",
+        "editor.lineHighlightBorder": "#9fced11f",
+        "statusBar.background": "#9c08f1",
+        "statusBar.foreground": "#070705",
+        "statusBar.noFolderBackground": "#e77123",
+        "editorIndentGuide.activeBackground1": "#E02970",
+        "workbench.editor.enablePreview": false
+    },
+    "workbench.colorTheme": "Tokyo Hack",
+
+    //PRETTIER
+
+    "prettier.semi": false,
+    "prettier.singleQuote": true,
+    "javascript.format.semicolons": "remove",
+    "typescript.format.semicolons": "remove",
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
+    },
+
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "git.enableSmartCommit": true,
+    "cSpell.userWords": ["capmec"],
+    "rapidapi.terminalLink.enabled": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "workbench.iconTheme": "material-icon-theme",
+    "material-icon-theme.activeIconPack": "react",
+    "material-icon-theme.files.associations": {},
+    "material-icon-theme.folders.associations": {},
+    "material-icon-theme.languages.associations": {
+        "react": "react"
+    },
+    "diffEditor.ignoreTrimWhitespace": false,
+    "cSpell.language": "en, de-de",
+    "workbench.editor.enablePreview": false,
+    "cSpell.words": ["onboarded", "repost"]
+}
