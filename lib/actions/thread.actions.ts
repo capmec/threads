@@ -7,6 +7,39 @@ import { connectToDB } from '../mongoose'
 import Thread from '../models/thread.model'
 import User from '../models/user.model'
 
+export async function fetchPosts(pageNumber = 1, pageSize = 20) {
+    connectToDB()
+
+    //Calculate the number of posts to skip
+    const skipAmount = (pageNumber - 1) * pageSize
+
+    //Fetch the posts that have no parents (top-level threads...)
+    const postsQuery = Thread.find({ parentId: { $in: [null, undefined] } })
+        .sort({ createdAt: 'desc' })
+        .skip(skipAmount)
+        .limit(pageSize)
+        .populate({ path: 'author', model: User })
+        .populate({
+            path: 'children',
+            populate: {
+                path: 'author',
+                model: User,
+                select: '_id name parentID image',
+            },
+        })
+
+    //Fetch the total number of posts
+    const totalPostsCount = await Thread.countDocuments({
+        parentId: { $in: [null, undefined] },
+    })
+
+    const posts = await postsQuery.exec()
+
+    const isNext = totalPostsCount > skipAmount + posts.length
+
+    return { posts, isNext }
+}
+
 interface Params {
     text: string
     author: string
@@ -39,39 +72,6 @@ export async function createThread({
     } catch (error: any) {
         throw new Error(`Failed to create thread: ${error.message}`)
     }
-}
-
-export async function fetchPosts(pageNumber = 1, pageSize = 20) {
-    connectToDB()
-
-    //Calculate the number of posts to skip
-    const skipAmount = (pageNumber - 1) * pageSize
-
-    //Fetch the posts that have no parents (top-level threads...)
-    const postsQuery = Thread.find({ parentId: { $in: [null, undefined] } })
-        .sort({ createdAt: 'desc' })
-        .skip(skipAmount)
-        .limit(pageSize)
-        .populate({ path: 'author', model: User })
-        .populate({
-            path: 'children',
-            populate: {
-                path: 'author',
-                model: User,
-                select: '_id name parentID image',
-            },
-        })
-
-    //Fetch the total number of posts
-    const totalPostsCount = await Thread.countDocuments({
-        parentId: { $in: [null, undefined] },
-    })
-
-    const posts = await postsQuery.exec()
-
-    const isNext = totalPostsCount > skipAmount + posts.length
-
-    return { posts, isNext }
 }
 
 export async function fetchThreadById(id: string) {
@@ -146,31 +146,5 @@ export async function addCommentToThread(
         revalidatePath(path)
     } catch (error: any) {
         throw new Error(`Failed to add comment to thread: ${error.message}`)
-    }
-}
-
-export async function fetchUserPosts(userId: string) {
-    try {
-        connectToDB()
-        //TODO: Populate community
-
-        //Find all threads authored by the user with th given userID
-        const threads = await User.findOne({ id: userId }).populate({
-            path: 'threads',
-            model: Thread,
-            populate: {
-                path: 'children',
-                model: Thread,
-                populate: {
-                    path: 'author',
-                    model: User,
-                    select: 'name image id',
-                },
-            },
-        })
-
-        return threads
-    } catch (error: any) {
-        throw new Error(`Failed to fetch user posts: ${error.message}`)
     }
 }
